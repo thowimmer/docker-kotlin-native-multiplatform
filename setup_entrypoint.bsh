@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [! -f ./home/.user_wine/drive_c/msys64/mingw64/lib/libcurl.a ]; then
+gosu user wineconsole cmd /c :
+gosu user wine reg add "HKEY_CURRENT_USER\\Environment" /v JAVA_HOME /t REG_SZ /d c:\\dev\\java
+gosu user wineconsole 'C:\msys64\usr\bin\bash.exe' --login -c "pacman -S --noconfirm mingw-w64-x86_64-curl"
+gosu user wineserver -w
+fi
