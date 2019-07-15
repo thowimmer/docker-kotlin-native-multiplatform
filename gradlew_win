@@ -1,0 +1,6 @@
+#!/bin/bash
+docker run -it --rm --cap-add SYS_PTRACE \
+           -v "$PWD:/work:delegated" \
+           -v docker-kotlin-native-mp_wine:/home/.user_wine \
+           thowimmer/kotlin-native-mp:latest \
+	   root -c "gosu user wineconsole gradlew.bat --no-daemon $*"
