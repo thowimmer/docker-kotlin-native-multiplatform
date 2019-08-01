@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
 
-if [! -f ./home/.user_wine/drive_c/msys64/mingw64/lib/libcurl.a ]; then
-gosu user wineconsole cmd /c :
-gosu user wine reg add "HKEY_CURRENT_USER\\Environment" /v JAVA_HOME /t REG_SZ /d c:\\dev\\java
-gosu user wineconsole 'C:\msys64\usr\bin\bash.exe' --login -c "pacman -S --noconfirm mingw-w64-x86_64-curl"
-gosu user wineserver -w
+CONTAINER_INITIALIZED=/home/user/.wine/drive_c/dev/.CONTAINER_INITIALIZED
+if [ ! -f "$CONTAINER_INITIALIZED" ]; then
+  unset DISPLAY
+  echo "INITIALIZE CONTAINER"
+  gosu user wineconsole cmd /c :
+  gosu user wine reg add "HKEY_CURRENT_USER\\Environment" /v JAVA_HOME /t REG_SZ /d c:\\dev\\java
+
+  IFS=';' read -ra PACKAGES <<< "$MSYS2_PACKAGES"
+  for i in "${PACKAGES[@]}"; do
+    gosu user wineconsole 'C:\msys64\usr\bin\bash.exe' --login -c "pacman -S --noconfirm $i"
+  done
+
+  gosu user wineserver -w
+  touch $CONTAINER_INITIALIZED
 fi
