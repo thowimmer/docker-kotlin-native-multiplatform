@@ -1,17 +1,47 @@
 #!/usr/bin/env bash
+setup_mingwX64 () {
+  echo "Setting up mingwX64 target..."
 
-CONTAINER_INITIALIZED=/home/user/.wine/drive_c/dev/.CONTAINER_INITIALIZED
-if [ ! -f "$CONTAINER_INITIALIZED" ]; then
-  unset DISPLAY
-  echo "INITIALIZE CONTAINER"
+  # Download and unpack ojdkbuild JDK8 to Wine home
+  gosu user mkdir -p /home/wine/drive_c/dev/
+  cd /home/wine/drive_c/dev/
+  gosu user wget https://github.com/ojdkbuild/ojdkbuild/releases/download/java-1.8.0-openjdk-1.8.0.222-1.b10/java-1.8.0-openjdk-1.8.0.222-1.b10.ojdkbuild.windows.x86_64.zip
+  gosu user unzip java-1.8.0-openjdk-1.8.0.222-1.b10.ojdkbuild.windows.x86_64.zip
+  gosu user rm -rf java-1.8.0-openjdk-1.8.0.222-1.b10.ojdkbuild.windows.x86_64.zip
+  gosu user mv java-1.8.0-openjdk-1.8.0.222-1.b10.ojdkbuild.windows.x86_64 java
+
+  #Set Java Home in Wine
   gosu user wineconsole cmd /c :
   gosu user wine reg add "HKEY_CURRENT_USER\\Environment" /v JAVA_HOME /t REG_SZ /d c:\\dev\\java
 
+  # Install MSYS2 packages
   IFS=';' read -ra PACKAGES <<< "$MSYS2_PACKAGES"
   for i in "${PACKAGES[@]}"; do
     gosu user wineconsole 'C:\msys64\usr\bin\bash.exe' --login -c "pacman -S --noconfirm $i"
   done
 
   gosu user wineserver -w
+
+  echo "mingwX64 setup completed"
+}
+
+CONTAINER_INITIALIZED=/home/user/.CONTAINER_INITIALIZED
+if [ ! -f "$CONTAINER_INITIALIZED" ]; then
+  unset DISPLAY
+  echo "---Initialize container---"
+  IFS=';' read -ra SUPPORTED_TARGETS <<< "$TARGETS"
+  for SUPPORTED_TARGET in "${SUPPORTED_TARGETS[@]}"; do
+    if [ "$SUPPORTED_TARGET" == "mingwX64" ]
+    then
+      setup_mingwX64
+    elif [ "$SUPPORTED_TARGET" == "linuxX64" ]
+    then
+      echo "SETUP linuxX64"
+    else
+      echo "Unsupported target: $SUPPORTED_TARGET"
+      exit 1
+    fi
+  done
   touch $CONTAINER_INITIALIZED
+  echo "---Container initialized---"
 fi
