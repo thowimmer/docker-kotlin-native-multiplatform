@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
+
 setup_mingwX64 () {
   echo "Setting up mingwX64 target..."
 
   # Download and unpack ojdkbuild JDK8 to Wine home
-  gosu user mkdir -p /home/wine/drive_c/dev/
-  cd /home/wine/drive_c/dev/
-  gosu user wget https://github.com/ojdkbuild/ojdkbuild/releases/download/java-1.8.0-openjdk-1.8.0.222-1.b10/java-1.8.0-openjdk-1.8.0.222-1.b10.ojdkbuild.windows.x86_64.zip
-  gosu user unzip java-1.8.0-openjdk-1.8.0.222-1.b10.ojdkbuild.windows.x86_64.zip
-  gosu user rm -rf java-1.8.0-openjdk-1.8.0.222-1.b10.ojdkbuild.windows.x86_64.zip
-  gosu user mv java-1.8.0-openjdk-1.8.0.222-1.b10.ojdkbuild.windows.x86_64 java
+
+  mkdir -p /home/user/.wine/drive_c/dev/
+  cd /home/user/.wine/drive_c/dev/
+  wget 'https://github.com/ojdkbuild/ojdkbuild/releases/download/java-1.8.0-openjdk-1.8.0.222-1.b10/java-1.8.0-openjdk-1.8.0.222-1.b10.ojdkbuild.windows.x86_64.zip'
+  unzip 'java-1.8.0-openjdk-1.8.0.222-1.b10.ojdkbuild.windows.x86_64.zip'
+  rm -rf 'java-1.8.0-openjdk-1.8.0.222-1.b10.ojdkbuild.windows.x86_64.zip'
+  mv 'java-1.8.0-openjdk-1.8.0.222-1.b10.ojdkbuild.windows.x86_64' 'java'
 
   #Set Java Home in Wine
   gosu user wineconsole cmd /c :
@@ -25,7 +27,7 @@ setup_mingwX64 () {
   echo "mingwX64 setup completed"
 }
 
-CONTAINER_INITIALIZED=/home/user/.CONTAINER_INITIALIZED
+CONTAINER_INITIALIZED=/home/user/.wine/.CONTAINER_INITIALIZED
 if [ ! -f "$CONTAINER_INITIALIZED" ]; then
   unset DISPLAY
   echo "---Initialize container---"
