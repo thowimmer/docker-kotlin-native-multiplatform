@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+MINGWX64_INITIALIZED=/home/user/.wine/.MINGWX64_INITIALIZED
+
 setup_mingwX64 () {
   echo "Setting up mingwX64 target..."
 
@@ -24,8 +26,12 @@ setup_mingwX64 () {
 
   gosu user wineserver -w
 
+  touch $MINGWX64_INITIALIZED
+
   echo "mingwX64 setup completed"
 }
+
+LINUXX64_INITIALIZED=/home/user/.wine/.LINUXX64_INITIALIZED
 
 setup_linuxX64(){
   echo "Setting up linuxX64 target..."
@@ -47,26 +53,19 @@ setup_linuxX64(){
     apt install -y "$i"
   done
 
+  touch $LINUXX64_INITIALIZED
+
   echo "linuxX64 setup completed"
 }
 
-CONTAINER_INITIALIZED=/home/user/.wine/.CONTAINER_INITIALIZED
-if [ ! -f "$CONTAINER_INITIALIZED" ]; then
-  unset DISPLAY
-  echo "---Initialize container---"
-  IFS=';' read -ra SUPPORTED_TARGETS <<< "$TARGETS"
-  for SUPPORTED_TARGET in "${SUPPORTED_TARGETS[@]}"; do
-    if [ "$SUPPORTED_TARGET" == "mingwX64" ]
-    then
-      setup_mingwX64
-    elif [ "$SUPPORTED_TARGET" == "linuxX64" ]
-    then
-      setup_linuxX64
-    else
-      echo "Unsupported target: $SUPPORTED_TARGET"
-      exit 1
-    fi
-  done
-  touch $CONTAINER_INITIALIZED
-  echo "---Container initialized---"
-fi
+IFS=';' read -ra SUPPORTED_TARGETS <<< "$TARGETS"
+for SUPPORTED_TARGET in "${SUPPORTED_TARGETS[@]}"; do
+  if [ "$SUPPORTED_TARGET" == "mingwX64" ] && [ ! -f "$MINGWX64_INITIALIZED" ]
+  then
+    setup_mingwX64
+  fi
+  if [ "$SUPPORTED_TARGET" == "linuxX64" ] && [ ! -f "$LINUXX64_INITIALIZED" ]
+  then
+    setup_linuxX64
+  fi
+done

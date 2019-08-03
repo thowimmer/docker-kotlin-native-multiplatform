@@ -2,10 +2,7 @@
 docker run -it --rm --cap-add SYS_PTRACE \
            -v "$PWD:/work:delegated" \
            -v docker-kotlin-native-mp_wine-home:/home/.user_wine \
-           -v docker-kotlin-native-mp_linux-home:/root \
-           -v docker-kotlin-native-mp_linux-usr:/usr \
-           -e TARGETS='mingwX64;linuxX64' \
+           -e TARGETS='mingwX64' \
       	   -e MSYS2_PACKAGES='mingw-w64-x86_64-curl' \
-           -e APT_PACKAGES='libcurl4-openssl-dev' \
            thowimmer/kotlin-native-mp:latest \
            root -c "gosu user wineconsole gradlew.bat --no-daemon $*"
