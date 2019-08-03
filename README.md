@@ -11,11 +11,43 @@ The functionality provided in this image is based uppon the work of:
 * mingwX64
 * linuxX64
 
-## Bash scripts for platform builds
-This repository also contains Bash scripts which can be put into the projects folder to execute platform specific builds.
+## How to use
+### [Example Bash script](gradlew_win) to build a Windows executable which needs the libcurl MSYS2 package during linking
+```bash
+#!/bin/bash
+docker run -it --rm --cap-add SYS_PTRACE \
+           -v "$PWD:/work:delegated" \
+           -v docker-kotlin-native-mp_wine-home:/home/.user_wine \
+           -e TARGETS='mingwX64' \
+      	   -e MSYS2_PACKAGES='mingw-w64-x86_64-curl' \
+           thowimmer/kotlin-native-mp:latest \
+           root -c "gosu user wineconsole gradlew.bat --no-daemon $*"
+```
 
-### [gradlew_win]
-Bash script which executes the gradlew.bat script in the container with the given arguments.
+### [Example Bash script](gradlew_linux) to build a Linux executable which needs the libcurl APT package during linking
+```bash
+#!/bin/bash
+docker run -it --rm --cap-add SYS_PTRACE \
+           -v "$PWD:/work:delegated" \
+           -v docker-kotlin-native-mp_linux-home:/root \
+           -v docker-kotlin-native-mp_linux-usr:/usr \
+           -e TARGETS='linuxX64' \
+           -e APT_PACKAGES='libcurl4-openssl-dev' \
+           thowimmer/kotlin-native-mp:latest \
+           root -c "gosu user ./gradlew --no-daemon $*"
+```
 
-### [gradlew_linux]
-Bash script which executes the gradlew script in the container with the given arguments.
+### Environment variables
+#### TARGETS environment variable
+Semicolon separated list of supported build targets.
+
+#### MSYS2_PACKAGES environment variable
+Semicolon separated list of MSYS2 packages to install during initial setup. Only relevant for build target **mingwX64**.
+
+#### APT_PACKAGES environment variable
+Semicolon separated list of APT packages to install during initial setup. Only relevant for build target **linuxX64**.
+
+### Additional notes
+* All relevant dependencies will be downloaded and persisted in the Docker volumes during the first build execution for a specific targets. Therefore subsequent builds will be significantly faster.
+
+* A build is not limited to single target. This means that you can adapt the *docker run* command with the required environment variables and command line arguments accordingly to execute a build for multiple targets.
