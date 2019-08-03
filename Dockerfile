@@ -8,6 +8,8 @@ RUN chmod 755 /setup_entrypoint.bsh
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ca-certificates wget unzip
 
+ENV JAVA_HOME=/home/user/.wine/linuxX64/java
+
 ENTRYPOINT ["/wine_entrypoint.bsh", "--add", "/setup_entrypoint.bsh"]
 
 #Set work directory
