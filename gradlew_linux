@@ -1,9 +1,10 @@
 #!/bin/bash
-docker run -it --rm --cap-add SYS_PTRACE \
+docker run --rm --cap-add SYS_PTRACE \
            -v "$PWD:/work:delegated" \
            -v docker-kotlin-native-mp_linux-home:/root \
            -v docker-kotlin-native-mp_linux-usr:/usr \
+           -e USER_ID=`id -u` \
            -e TARGETS='linuxX64' \
            -e APT_PACKAGES='libcurl4-openssl-dev' \
-           thowimmer/kotlin-native-mp:latest \
+           thowimmer/kotlin-native-multiplatform \
            root -c "gosu user ./gradlew --no-daemon $*"
